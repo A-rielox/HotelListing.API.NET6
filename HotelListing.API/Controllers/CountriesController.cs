@@ -40,7 +40,7 @@ namespace HotelListing.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
         {
-            //             Select * form Countries
+            //                     Select * form Countries
             var countries = await _context.Countries.ToListAsync();
 
             // no puedo mapear una collection a un object
@@ -74,14 +74,25 @@ namespace HotelListing.API.Controllers
         /////////////////////////////////
         // PUT: api/Countries/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCountry(int id, Country country)
+        public async Task<IActionResult> PutCountry(int id, UpdateCountryDto updateCountryDto)
         {
-            if (id != country.Id)
+            if (id != updateCountryDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(country).State = EntityState.Modified;
+            //_context.Entry(country).State = EntityState.Modified;
+
+            var country = await _context.Countries.FindAsync(id);
+
+            if(country == null)
+            {
+                return NotFound();
+            }
+
+            // usa la data de updatedCountryDto para editar country, y ya 
+            // abajo se guardan los cambios
+            _mapper.Map(updateCountryDto, country);
 
             try
             {

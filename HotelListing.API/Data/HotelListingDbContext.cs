@@ -7,9 +7,7 @@ namespace HotelListing.API.Data
         // estas options son las q paso en Program.cs
         public HotelListingDbContext(DbContextOptions options) : base(options)
         {
-
         }
-
         public DbSet<Hotel> Hotels { get; set; }
         public DbSet<Country> Countries { get; set; }
 

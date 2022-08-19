@@ -3,10 +3,7 @@
 namespace HotelListing.API.Models.Country
 {
     // Modelo para ser ocupado en la creacion de countries
-    public class CreateCountryDto
+    public class CreateCountryDto : BaseCountryDto
     {
-        [Required]
-        public string Name { get; set; }
-        public string ShortName { get; set; }
     }
 }
