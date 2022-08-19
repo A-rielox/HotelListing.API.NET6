@@ -11,6 +11,7 @@ namespace HotelListing.API.Data
         public DbSet<Hotel> Hotels { get; set; }
         public DbSet<Country> Countries { get; set; }
 
+        //
         // para el seeding de la DB
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

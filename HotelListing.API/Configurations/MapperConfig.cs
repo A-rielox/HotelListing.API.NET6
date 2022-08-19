@@ -5,7 +5,7 @@ using HotelListing.API.Models.Hotel;
 
 namespace HotelListing.API.Configurations
 {
-    // permite crear maps entre mis data types
+    // permite crear maps entre mis data types ( entre mis modelos para DB y los modelos para mandar o recibir como respuesta )
     // se ocupa con dependency injection
     public class MapperConfig : Profile
     {
