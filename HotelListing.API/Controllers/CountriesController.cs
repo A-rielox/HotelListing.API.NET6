@@ -26,6 +26,7 @@ namespace HotelListing.API.Controllers
         }
 
         /////////////////////////////////
+        /////////////////////////////////
         // GET: api/Countries
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GetCountryDto>>> GetCountries()
@@ -39,6 +40,7 @@ namespace HotelListing.API.Controllers
             return Ok(records);
         }
 
+        /////////////////////////////////
         /////////////////////////////////
         // GET: api/Countries/5
         [HttpGet("{id}")]
