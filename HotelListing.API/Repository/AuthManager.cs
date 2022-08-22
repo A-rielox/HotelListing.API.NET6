@@ -3,6 +3,10 @@ using HotelListing.API.Contracts;
 using HotelListing.API.Data;
 using HotelListing.API.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace HotelListing.API.Repository
 {
@@ -12,27 +16,32 @@ namespace HotelListing.API.Repository
         private readonly UserManager<ApiUser> _userManager;
         // "UserManager" default library que ayuda con el registro ( parece q actua
         // como el context )
-        public AuthManager(IMapper mapper, UserManager<ApiUser> userManager)
+        private readonly IConfiguration _configuration;// la config que tiene la secret-key en Program.cs
+
+        public AuthManager(IMapper mapper, UserManager<ApiUser> userManager, IConfiguration configuration)
         {
             this._userManager = userManager;
             this._mapper = mapper;
+            this._configuration = configuration;
         }
 
-        public async Task<bool> Login(LoginDto loginDto)
+        public async Task<AuthResponseDto> Login(LoginDto loginDto)
         {
-            bool isValidUser = false;
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            bool isValidUser = await _userManager.CheckPasswordAsync(user, loginDto.Password);
 
-            try
+            if (user == null || isValidUser == false)
             {
-                var user = await _userManager.FindByEmailAsync(loginDto.Email);
-                isValidUser = await _userManager.CheckPasswordAsync(user, loginDto.Password);
-            }
-            catch (Exception)
-            {
+                return null;
             }
 
-            return isValidUser;
+            var token = await GenerateToken(user);
 
+            return new AuthResponseDto
+            {
+                Token = token,
+                UserId = user.Id
+            };
         }
 
         public async Task<IEnumerable<IdentityError>> Register(ApiUserDto userDto)
@@ -48,6 +57,39 @@ namespace HotelListing.API.Repository
             }
 
             return result.Errors;
+        }
+
+        private async Task<string> GenerateToken(ApiUser user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var roles = await _userManager.GetRolesAsync(user);
+            // este basicamente me crea una lista de los roles del usuario sea 1 o +
+            var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
+
+            // xsi cree claims manuales al registrar al user
+            var userClaims = await _userManager.GetClaimsAsync(user);
+
+            // la lista de claims para el token
+            var claims = new List<Claim>
+            {
+                // JwtRegisteredClaimNames.Sub es el subject a quien se le dio el token ( el usuario )
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            }.Union(userClaims).Union(roleClaims);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToInt32(_configuration["JwtSettings:DurationInMinutes"])),
+                signingCredentials: credentials
+                );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }
