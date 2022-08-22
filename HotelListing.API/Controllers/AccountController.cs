@@ -3,6 +3,9 @@ using HotelListing.API.Models.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+// para rastrear con el logger lo que pasa en un archivo, lo meto x dependency injection
+// aca para ver lo q pasa al logearse
+
 namespace HotelListing.API.Controllers
 {
     [Route("api/[controller]")]
@@ -10,10 +13,12 @@ namespace HotelListing.API.Controllers
     public class AccountController : ControllerBase
     {
         public readonly IAuthManager _authManager;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IAuthManager authManager)
+        public AccountController(IAuthManager authManager, ILogger<AccountController> logger)
         {
             this._authManager = authManager;
+            this._logger = logger;
         }
 
         //POST: api/Account/register
@@ -24,6 +29,9 @@ namespace HotelListing.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Register([FromBody] ApiUserDto apiUserDto)
         {
+            // para logear cuando alguien intenta registrarse
+            _logger.LogInformation($"Registration Attempt for {apiUserDto.Email}");
+
             var errors = await _authManager.Register(apiUserDto);
 
             // el ModelState es donde estan guardados esos errores q se manejan xdefault
@@ -51,12 +59,11 @@ namespace HotelListing.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var authResponse = await _authManager.Login(loginDto);
+            _logger.LogInformation($"Login attempt for {loginDto.Email}");
 
+            var authResponse = await _authManager.Login(loginDto);
             if (authResponse == null)
-            {
                 return Unauthorized();
-            }
 
             // en authResponse esta el token y userId
             return Ok(authResponse);

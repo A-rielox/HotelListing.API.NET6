@@ -10,6 +10,7 @@ using HotelListing.API.Models.Country;
 using AutoMapper;
 using HotelListing.API.Contracts;
 using Microsoft.AspNetCore.Authorization;
+using HotelListing.API.Exceptions;
 
 namespace HotelListing.API.Controllers
 {
@@ -19,11 +20,14 @@ namespace HotelListing.API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly ICountriesRepository _countriesRepository;
+        private readonly ILogger<CountriesController> _logger;
 
-        public CountriesController(IMapper mapper, ICountriesRepository countriesRepository)
+        public CountriesController(IMapper mapper, 
+            ICountriesRepository countriesRepository,ILogger<CountriesController> logger)
         {
             this._mapper = mapper;
             this._countriesRepository = countriesRepository;
+            this._logger = logger;
         }
 
         /////////////////////////////////
@@ -51,11 +55,8 @@ namespace HotelListing.API.Controllers
             // sobreescribo elgenerico en ICountriesRepository y xende en CountriesRepository
             var country = await _countriesRepository.GetDetails(id);
 
-
             if (country == null)
-            {
-                return NotFound();
-            }
+                throw new NotFoundException(nameof(GetCountry),id);
 
             var countryDto = _mapper.Map<CountryDto>(country);
 
@@ -76,9 +77,7 @@ namespace HotelListing.API.Controllers
             var country = await _countriesRepository.GetAsync(id);
 
             if (country == null)
-            {
-                return NotFound();
-            }
+                throw new NotFoundException(nameof(PutCountry), id);
 
             // usa la data de updatedCountryDto para editar country, y ya 
             _mapper.Map(updateCountryDto, country);
@@ -126,10 +125,11 @@ namespace HotelListing.API.Controllers
         public async Task<IActionResult> DeleteCountry(int id)
         {
             var country = await _countriesRepository.GetAsync(id);
+
+            // con el exceptionMiddleware puedo tirar las exceptions y alla las agarro
+            // sin que todo crashee
             if (country == null)
-            {
-                return NotFound();
-            }
+                throw new NotFoundException(nameof(DeleteCountry), id);
 
             await _countriesRepository.DeleteAsync(id);
 
