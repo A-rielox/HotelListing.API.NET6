@@ -24,7 +24,9 @@ builder.Services.AddDbContext<HotelListingDbContext>(options =>
 // builder.Services.AddIdentityCore<IdentityUser>()
 builder.Services.AddIdentityCore<ApiUser>()
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<HotelListingDbContext>();
+    .AddTokenProvider<DataProtectorTokenProvider<ApiUser>>("HotelListingApi")
+    .AddEntityFrameworkStores<HotelListingDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -84,7 +86,7 @@ app.UseHttpsRedirection();
 // pongo la policy en el pipeline, la cors policy va a permitir que usuarios q no estan
 // en el mismo server q mi app puedan acceder a ella.
 app.UseCors("AllowAll");
-
+app.UseAuthentication(); // pa lo del token
 app.UseAuthorization();
 
 app.MapControllers();
