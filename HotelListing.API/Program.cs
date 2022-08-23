@@ -94,6 +94,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// para el caching
+builder.Services.AddResponseCaching(options =>
+{
+    options.MaximumBodySize = 1024;
+    options.UseCaseSensitivePaths = true;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -110,6 +117,24 @@ app.UseHttpsRedirection();
 // pongo la policy en el pipeline, la cors policy va a permitir que usuarios q no estan
 // en el mismo server q mi app puedan acceder a ella.
 app.UseCors("AllowAll");
+
+// para caching
+app.UseResponseCaching();
+app.Use(async (context, next) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+        new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+        {
+            Public = true,
+            MaxAge = TimeSpan.FromSeconds(10)
+            // basicamente dice q entrega info nueva cada 10 segs ( mantiene el cache vivo x 10 segs )
+        };
+    context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
+        new string[] { "Accept-Encoding" };
+
+    await next();
+});
+
 app.UseAuthentication(); // pa lo del token
 app.UseAuthorization();
 

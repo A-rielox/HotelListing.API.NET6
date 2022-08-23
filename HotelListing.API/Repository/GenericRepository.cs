@@ -1,5 +1,8 @@
-﻿using HotelListing.API.Contracts;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using HotelListing.API.Contracts;
 using HotelListing.API.Data;
+using HotelListing.API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListing.API.Repository
@@ -7,9 +10,11 @@ namespace HotelListing.API.Repository
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         private readonly HotelListingDbContext _context;
-        public GenericRepository(HotelListingDbContext context)
+        private readonly IMapper _mapper;
+        public GenericRepository(HotelListingDbContext context, IMapper mapper)
         {
             this._context = context;
+            this._mapper = mapper;
         }
 
         // en el controller original antes de repository
@@ -65,6 +70,29 @@ namespace HotelListing.API.Repository
             // pero como no lo sabe este es el generico
 
             return await _context.Set<T>().ToListAsync();
+        }
+
+        public async Task<PagedResults<TResult>> GetAllAsync<TResult>(QueryParameters queryParameters)
+        {
+            // <T> representaria el modelo, <TResult> representaria el Dto
+            // projectTo va a hacer q en el query q manda solo pida la info q se necesita
+            // en el Dto ( es mas eficiente para la DB de esta forma ), en lugar de pedir
+            // todo y aca pasarlo a Dto
+            var totalSize = await _context.Set<T>().CountAsync();
+
+            var items = await _context.Set<T>()
+                .Skip(queryParameters.StartIndex)
+                .Take(queryParameters.PageSize)
+                .ProjectTo<TResult>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            return new PagedResults<TResult>
+            {
+                Items = items,
+                PageNumber = queryParameters.PageNumber,
+                RecordNumber = queryParameters.PageSize,
+                TotalCount = totalSize
+            };
         }
 
         // en controller antes de repository
