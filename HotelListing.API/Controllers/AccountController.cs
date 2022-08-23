@@ -1,6 +1,5 @@
-﻿using HotelListing.API.Contracts;
-using HotelListing.API.Models.Users;
-using Microsoft.AspNetCore.Http;
+﻿using HotelListing.API.Core.Contracts;
+using HotelListing.API.Core.Models.Users;
 using Microsoft.AspNetCore.Mvc;
 
 // para rastrear con el logger lo que pasa en un archivo, lo meto x dependency injection
@@ -63,7 +62,9 @@ namespace HotelListing.API.Controllers
 
             var authResponse = await _authManager.Login(loginDto);
             if (authResponse == null)
+            {
                 return Unauthorized();
+            }
 
             // en authResponse esta el token y userId
             return Ok(authResponse);
