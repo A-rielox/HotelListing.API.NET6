@@ -54,13 +54,24 @@ namespace HotelListing.API.Core.Repository
             _logger.LogInformation($"Looking for user with email {loginDto.Email}");
 
             _user = await _userManager.FindByEmailAsync(loginDto.Email);
+
+            if (_user is null)
+            {
+                return default;
+            }
+
             bool isValidUser = await _userManager.CheckPasswordAsync(_user, loginDto.Password);
 
-            if (_user == null || isValidUser == false)
+            if (!isValidUser)
             {
-                _logger.LogWarning($"User with email {loginDto.Email} not found");
-                return null;
+                return default;
             }
+
+            //if (_user == null || isValidUser == false)
+            //{
+            //    _logger.LogWarning($"User with email {loginDto.Email} not found");
+            //    return null;
+            //} REFACTOR ESTE PEDAZO
 
             var token = await GenerateToken();
 
