@@ -161,6 +161,12 @@ namespace HotelListing.API.Controllers
     }
 }
 
+//
+//
+//ActionResult < T > return type for web API controller actions.
+//
+//
+
 /////////////////////////
 ///
 /// Previo REPOSITORY

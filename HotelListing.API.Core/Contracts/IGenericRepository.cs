@@ -15,3 +15,7 @@ namespace HotelListing.API.Core.Contracts
         Task<PagedResults<TResult>> GetAllAsync<TResult>(QueryParameters queryParameters);
     }
 }
+
+// es " Task " sin " ActionResult " xq este habla con la base de datos y el "Task" es
+// q es una operacion asincrona q devuelve un valor, y el " ActionResult " es el
+// return type for web API controller actions.

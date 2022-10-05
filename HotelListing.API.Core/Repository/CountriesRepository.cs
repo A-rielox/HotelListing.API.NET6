@@ -8,6 +8,7 @@ namespace HotelListing.API.Core.Repository
     public class CountriesRepository : GenericRepository<Country>, ICountriesRepository
     {
         private readonly HotelListingDbContext _context;
+
         public CountriesRepository(HotelListingDbContext context, IMapper mapper)
             : base(context, mapper)
         {

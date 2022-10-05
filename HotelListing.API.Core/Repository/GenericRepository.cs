@@ -138,6 +138,7 @@ namespace HotelListing.API.Core.Repository
         //}
         public async Task UpdateAsync(T entity)
         {
+            // el "Update()" pone el EntityState en modified y ya luego se puede guardar cambios
             _context.Update(entity);
             await _context.SaveChangesAsync();
         }
