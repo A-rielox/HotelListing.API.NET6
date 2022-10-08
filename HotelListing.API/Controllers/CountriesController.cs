@@ -84,7 +84,7 @@ namespace HotelListing.API.Controllers
         /////////////////////////////////
         // PUT: api/Countries/5
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize] // cualquier usuario pero autorizado
         public async Task<IActionResult> PutCountry(int id, UpdateCountryDto updateCountryDto)
         {
             if (id != updateCountryDto.Id)
@@ -138,7 +138,7 @@ namespace HotelListing.API.Controllers
         /////////////////////////////////
         // DELETE: api/Countries/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator")] // solo admins logeados
         // en el token estan los reles del usuario
         public async Task<IActionResult> DeleteCountry(int id)
         {

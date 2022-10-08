@@ -128,6 +128,7 @@ namespace HotelListing.API.Core.Repository
                 };
             }
 
+            // si no es valido el refreshT esta linea le genera una nueva security stamp y le hace logout
             await _userManager.UpdateSecurityStampAsync(_user);
             return null;
         }
@@ -149,9 +150,11 @@ namespace HotelListing.API.Core.Repository
             var claims = new List<Claim>
             {
                 // JwtRegisteredClaimNames.Sub es el subject a quien se le dio el token ( el usuario )
+                // new Claim("uid", user.Id) --> por si quiero enviar el id de usuario en el token
                 new Claim(JwtRegisteredClaimNames.Sub, _user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, _user.Email),
+                new Claim("uid", user.Id),
             }.Union(userClaims).Union(roleClaims);
 
             var token = new JwtSecurityToken(
