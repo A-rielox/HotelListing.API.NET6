@@ -15,7 +15,7 @@ namespace HotelListing.API.Data
         // el normal con MAGIC STRING "[ForeignKey("CountryId"))]" no avisa si hay
         // error xq cambie el nombre o algo asi, xeso se ocupa mejor este
         [ForeignKey(nameof(CountryId))]
-        public int CountryId { get; set; }
+        public int CountryId { get; set; } // c/hotel pertenece a un country
         public Country Country { get; set; }
     }
 }

@@ -34,6 +34,9 @@ namespace HotelListing.API.Core.Repository
             this._logger = logger;
         }
 
+
+        /// ////////////////////////////////////
+        //////////////////////////////////////////
         public async Task<string> CreateRefreshToken()
         {
             await _userManager.RemoveAuthenticationTokenAsync(_user, _loginProvider, _refreshToken);
@@ -49,6 +52,9 @@ namespace HotelListing.API.Core.Repository
             return newRefreshToken;
         }
 
+
+        /// ////////////////////////////////////
+        //////////////////////////////////////////
         public async Task<AuthResponseDto> Login(LoginDto loginDto)
         {
             _logger.LogInformation($"Looking for user with email {loginDto.Email}");
@@ -87,6 +93,9 @@ namespace HotelListing.API.Core.Repository
             };
         }
 
+
+        /// ////////////////////////////////////
+        //////////////////////////////////////////
         public async Task<IEnumerable<IdentityError>> Register(ApiUserDto userDto)
         {
             _user = _mapper.Map<ApiUser>(userDto);
@@ -102,6 +111,9 @@ namespace HotelListing.API.Core.Repository
             return result.Errors;
         }
 
+
+        /// ////////////////////////////////////
+        //////////////////////////////////////////
         public async Task<AuthResponseDto> VerifyRefreshToken(AuthResponseDto request)
         {
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
@@ -133,6 +145,8 @@ namespace HotelListing.API.Core.Repository
             return null;
         }
 
+        /// ////////////////////////////////////
+        //////////////////////////////////////////
         private async Task<string> GenerateToken()
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
@@ -154,7 +168,7 @@ namespace HotelListing.API.Core.Repository
                 new Claim(JwtRegisteredClaimNames.Sub, _user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, _user.Email),
-                new Claim("uid", user.Id),
+                new Claim("uid", _user.Id),
             }.Union(userClaims).Union(roleClaims);
 
             var token = new JwtSecurityToken(
