@@ -85,6 +85,7 @@ namespace HotelListing.API.Core.Repository
             _logger.LogInformation($"Token generated successfuly for user with " +
                 $"email {loginDto.Email} | Token: {token}");
 
+            // estoy mandando el id del user en UserId y en el token
             return new AuthResponseDto
             {
                 Token = token,
@@ -153,11 +154,12 @@ namespace HotelListing.API.Core.Repository
 
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+            // los roles q el user tiene en la base de datos ( es una list de strings con los roles )
             var roles = await _userManager.GetRolesAsync(_user);
             // este basicamente me crea una lista de los roles del usuario sea 1 o +
             var roleClaims = roles.Select(x => new Claim(ClaimTypes.Role, x)).ToList();
 
-            // xsi cree claims manuales al registrar al user
+            // xsi cree claims manuales al registrar al user ( estarian guardados en la DB, xel identityUser )
             var userClaims = await _userManager.GetClaimsAsync(_user);
 
             // la lista de claims para el token

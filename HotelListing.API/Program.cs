@@ -26,6 +26,7 @@ builder.Services.AddDbContext<HotelListingDbContext>(options =>
 
 // para Security
 // builder.Services.AddIdentityCore<IdentityUser>()
+// necesito intalar nuGet " Microsoft.AspNetCore.Identity.EntityFrameworkCore "
 builder.Services.AddIdentityCore<ApiUser>()
     .AddRoles<IdentityRole>()
     .AddTokenProvider<DataProtectorTokenProvider<ApiUser>>("HotelListingApi")
@@ -80,20 +81,20 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters 
-    { 
-        ValidateIssuerSigningKey = true,
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero,
-        // estas ( abajo ) son las unicas q se buscan en "appsettings.json"
-        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
-    };
-});
+    {
+        options.TokenValidationParameters = new TokenValidationParameters 
+        { 
+            ValidateIssuerSigningKey = true, // verifica mi secret-key
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+            // estas ( abajo ) son las unicas q se buscan en "appsettings.json"
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
+        };
+    });
 
 // para el caching
 builder.Services.AddResponseCaching(options =>
